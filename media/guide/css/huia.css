@@ -1,0 +1,39 @@
+html,
+#kodoc-footer,
+#kodoc-header {
+	background: #272727;
+}
+
+#kodoc-footer {
+	color: #D76F57;
+}
+
+#kodoc-content .wrapper {
+	background: #333;
+}
+
+#kodoc-content .container {
+	background: rgba(250, 250, 250, 1);
+	border-radius: 5px;
+}
+
+#kodoc-topics > ul > li > a,
+#kodoc-topics > ul > li > span {
+	color: #D76F57;
+}
+
+#kodoc-breadcrumb {
+	padding-top: 0.5em;
+}
+
+#kodoc-menu {
+	background: #D76F57;
+}
+
+#kodoc-menu li a {
+	border-right-color: #D76F57;
+}
+
+#kodoc-menu li a:hover {
+	background-color: #633;
+}

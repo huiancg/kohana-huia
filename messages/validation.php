@@ -1,0 +1,30 @@
+<?php defined('SYSPATH') OR die('No direct script access.');
+
+return array(
+  'alpha'         => ':field deve conter apenas letters',
+  'alpha_dash'    => ':field deve conter apenas numbers, letras e traços',
+  'alpha_numeric' => ':field deve conter apenas letras e números',
+  'color'         => ':field tem que ser uma cor',
+  'credit_card'   => ':field tem que ser um número de cartão de crédito',
+  'date'          => ':field tem que ser um data',
+  'decimal'       => ':field tem que ser um decimal com :param2 casas',
+  'digit'         => ':field tem que ser um digito',
+  'email'         => ':field tem que ser um endereço valido',
+  'email_domain'  => ':field deve possuir um domínio valido',
+  'equals'        => ':field tem de ser igual a :param2',
+  'exact_length'  => ':field deve possuir exatamente :param2 caracteres',
+  'in_array'      => ':field deve ser uma das opções disponíveis',
+  'ip'            => ':field tem que ser um endereço de ip',
+  'matches'       => ':field deve ser igual ao :param2',
+  'min_length'    => ':field deve possuir pelo menos de :param2 caracteres',
+  'max_length'    => ':field não pode possuir mais de :param2 caracteres',
+  'not_empty'     => ':field não pode ser vazio',
+  'numeric'       => ':field deve ser numérico',
+  'phone'         => ':field deve ser um número de telefone',
+  'range'         => ':field deve estar entre :param2 e :param3',
+  'regex'         => ':field não é compatível com o formato válido',
+  'url'           => ':field tem que ser uma url',
+  
+  'not_tags'    => ':field não pode possuir HTML',
+  'unique'    => ':field já está cadastrado',
+);
