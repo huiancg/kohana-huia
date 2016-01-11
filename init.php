@@ -30,6 +30,15 @@ function create_dir($path)
   }
 }
 
+if ( ! function_exists('dd'))
+{
+  function dd()
+  {
+    echo call_user_func_array('Debug::vars', func_get_args());
+    exit();
+  }
+}
+
 // Auto base_url
 if (Kohana::$base_url === '/')
 {
