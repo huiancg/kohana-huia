@@ -2,6 +2,17 @@
 
 class Huia_ORM extends Kohana_ORM {
 
+  public static $_orm_deep = NULL;
+  
+  public static function orm_deep()
+  {
+    if (self::$_orm_deep === NULL)
+	{
+	  self::$_orm_deep = Kohana::$config->load('huia/base.orm_deep');
+	}
+	return self::$_orm_deep;
+  }
+
   /**
    * 
    * @return ORM
@@ -28,7 +39,7 @@ class Huia_ORM extends Kohana_ORM {
    */
   public function all_as_array($table_name = NULL, $filter = NULL, $callback = NULL, $deep = 0)
   {
-    if ($deep > 10)
+    if ($deep > self::orm_deep())
     {
       return 'Too Deep :(';
     }
@@ -59,7 +70,7 @@ class Huia_ORM extends Kohana_ORM {
           $result[$key] = $item->get_url($key);
         }
 
-        if (is_string($key) AND is_string($value) AND preg_match('/^(name|title)/', $key))
+        if ( ! isset($result['slug']) AND is_string($key) AND is_string($value) AND preg_match('/^(name|title)/', $key))
         {
           $result['slug'] = Huia_URL::slug($value .' '. $result['id']);
         }
@@ -247,6 +258,8 @@ class Huia_ORM extends Kohana_ORM {
     
     $model = $model->create($validation);
 
+    $model->set_composite_id();
+
     $this->save_composite_childs($model);
 
     return $model;
@@ -323,6 +336,18 @@ class Huia_ORM extends Kohana_ORM {
     $query = DB::delete($this->table_name())
                     ->where($this->composite_pk(), '=', $current->{$current->composite_pk()})
                     ->where($this->_primary_key, '>', $current->{$this->_primary_key})
+                    ->execute();
+  }
+
+  /**
+   * Set composite id by composite pk
+   */
+  public function set_composite_id()
+  {
+    DB::update($this->table_name())
+                    ->set(array($this->composite_pk() => $this->id))
+                    ->where('id', '=', $this->id)
+                    ->where($this->composite_pk(), 'IS', NULL)
                     ->execute();
   }
 
