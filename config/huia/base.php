@@ -1,6 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 return array(
+	'orm_deep' => 10,
 	'autogen' => array(
 		'database' => Kohana::$environment !== Kohana::PRODUCTION,
 		'tables'   => FALSE,
