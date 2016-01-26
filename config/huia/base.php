@@ -2,6 +2,7 @@
 
 return array(
 	'orm_deep' => 10,
+	'cache_token' => sha1(Cookie::$salt . '.C4cH3c13An37!'),
 	'autogen' => array(
 		'database' => Kohana::$environment !== Kohana::PRODUCTION,
 		'tables'   => FALSE,
