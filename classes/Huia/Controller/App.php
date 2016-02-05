@@ -73,6 +73,11 @@ abstract class Huia_Controller_App extends Controller {
   public $content = NULL;
 
   /**
+   * @var Mobile_Detect Intence with Mobile Detect
+   */
+  public static $mobile_detect = NULL;
+
+  /**
    * Set the cache if Kohana is Caching and cached is true
    * 
    * @see cached
@@ -92,6 +97,19 @@ abstract class Huia_Controller_App extends Controller {
     Cache::instance()->set($this->_cache_key, $cache);
   }
 
+  protected function _cache_key()
+  {
+    return join('.', [
+      'Huia.Controller',
+      Kohana::$base_url,
+      gethostname(),
+      $this->request->uri(),
+      $this->is_ajax,
+      $this->is_mobile(),
+      Request::current()->user_agent('browser'),
+    ]);
+  }
+
   /**
    * Render cached responde, if defined
    * 
@@ -104,7 +122,7 @@ abstract class Huia_Controller_App extends Controller {
       return;
     }
     
-    $this->_cache_key = 'Huia.Controller.' . Kohana::$base_url . gethostname() . $this->request->uri() . '.' . $this->is_ajax . '.' . $this->is_mobile();
+    $this->_cache_key = $this->_cache_key();
 
     $cache = Cache::instance()->get($this->_cache_key);
     if ($cache)
@@ -193,13 +211,27 @@ abstract class Huia_Controller_App extends Controller {
   }
 
   /**
+   * Instance of Mobile_Detect
+   * 
+   * @return Mobile_Detect
+   */
+  public static function mobile_detect()
+  {
+    if ( ! self::$mobile_detect)
+    {
+      self::$mobile_detect = new Mobile_Detect((array) Request::current()->headers(), Request::$user_agent);
+    }
+    return self::$mobile_detect;
+  }
+
+  /**
    * Check if useragent is a Crawler
    * 
    * @return bool
    */
   public function is_crawler()
   {
-    return preg_match('/(bot|crawl|slurp|spider|seeker|facebook)/i', Arr::get($_SERVER, 'HTTP_USER_AGENT', ''));
+    return $this->mobile_detect()->isBot();
   }
   
   /**
@@ -209,7 +241,7 @@ abstract class Huia_Controller_App extends Controller {
    */
   public function is_mobile()
   {
-    return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", Request::$user_agent);
+    return $this->mobile_detect()->isMobile();
   }
 
   /**
@@ -227,7 +259,7 @@ abstract class Huia_Controller_App extends Controller {
 
     $this->is_ajax = $this->request->is_ajax();
     $this->is_crawler = $this->is_crawler();
-	$this->is_mobile = $this->is_mobile();
+    $this->is_mobile = $this->is_mobile();
 
     // do cache
     $this->_cache();
@@ -248,6 +280,7 @@ abstract class Huia_Controller_App extends Controller {
     View::set_global('controller', $this->controller);
     View::set_global('action', $this->action);
     View::set_global('is_ajax', $this->is_ajax);
+    View::set_global('mobile_detect', $this->mobile_detect());
     View::set_global('is_crawler', $this->is_crawler);
     View::set_global('is_mobile', $this->is_mobile);	
 

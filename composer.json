@@ -4,6 +4,7 @@
   "require": {
     "composer/installers": "~1.0",
     "kohana/core": ">=3.3",
+    "mobiledetect/mobiledetectlib": "^2.8",
     "php": ">=5.3.3"
   },
   "extra": {
