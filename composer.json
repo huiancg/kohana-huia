@@ -1,5 +1,5 @@
 {
-  "name": "huia/kohana-huia",
+  "name": "huiancg/kohana-huia",
   "type": "kohana-module",
   "require": {
     "composer/installers": "~1.0",
