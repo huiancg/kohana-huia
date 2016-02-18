@@ -231,7 +231,7 @@ abstract class Huia_Controller_App extends Controller {
    */
   public function is_crawler()
   {
-    return $this->mobile_detect()->isBot();
+    return $this->mobile_detect()->is('Bot');
   }
   
   /**
