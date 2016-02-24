@@ -299,7 +299,7 @@ class Huia_ORM_Autogen {
     if (Arr::get($autogen, 'database') AND ! self::db_exists())
     {
       $database = Kohana::$config->load('database.'.Kohana::$environment.'.connection.database');
-      DB::query(NULL, 'CREATE DATABASE `'.$database,'`')->execute();
+      DB::query(NULL, 'CREATE DATABASE `'.$database.'`')->execute();
 
       // reset connection
       Database::instance()->disconnect();
