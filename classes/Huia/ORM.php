@@ -260,6 +260,8 @@ class Huia_ORM extends Kohana_ORM {
 
     $model->set_composite_id();
 
+    $model->set_composite_actived();
+
     $this->save_composite_childs($model);
 
     return $model;
