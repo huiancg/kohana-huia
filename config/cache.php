@@ -7,7 +7,8 @@ return array(
     'ignore_on_delete'   => array(
       '.gitignore',
       '.git',
-      '.svn'
+      '.svn',
+      '.gitkeep'
     ),
   ),
 );
