@@ -307,7 +307,7 @@ abstract class Huia_Controller_App extends Controller {
       $file = str_replace('_', '/', $this->action);
       
       // Set default template file
-      if (Kohana::find_file('views/'.$dir, $file))
+      if (Kohana::find_file('views/'.$dir, $file) AND $this->content === NULL)
       {
         $this->content = View::factory($dir.'/'.$file);
       }
