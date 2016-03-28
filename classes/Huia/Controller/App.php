@@ -78,6 +78,11 @@ abstract class Huia_Controller_App extends Controller {
   public static $mobile_detect = NULL;
 
   /**
+   * @var string Path for custom meta data
+   */
+  public $custom_meta_path = NULL;
+
+  /**
    * Set the cache if Kohana is Caching and cached is true
    * 
    * @see cached
@@ -183,7 +188,12 @@ abstract class Huia_Controller_App extends Controller {
   protected function _meta()
   {
     $default = Kohana::$config->load('huia/meta.default');
-    $current = Kohana::$config->load('huia/meta.'.$this->controller . '.' . $this->action);
+
+    $path = $this->controller . '.' . $this->action;
+    if($this->custom_meta_path)
+      $path = $this->custom_meta_path;
+
+    $current = Kohana::$config->load('huia/meta.' . $path);
 	
     if ($current)
     {
