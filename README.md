@@ -1,3 +1,5 @@
+[![Latest Stable Version](https://poser.pugx.org/huiancg/kohana-huia/v/stable)](https://packagist.org/packages/huiancg/kohana-huia) [![Total Downloads](https://poser.pugx.org/huiancg/kohana-huia/downloads)](https://packagist.org/packages/huiancg/kohana-huia) [![Latest Unstable Version](https://poser.pugx.org/huiancg/kohana-huia/v/unstable)](https://packagist.org/packages/huiancg/kohana-huia) [![License](https://poser.pugx.org/huiancg/kohana-huia/license)](https://packagist.org/packages/huiancg/kohana-huia)
+
 # O que é o kohana-huia
 Consiste em um sistema base para criação de aplicações WEB de baixa complexibilidade com velocidade, levando a lógica para a camada de interface.
 
