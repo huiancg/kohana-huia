@@ -78,11 +78,6 @@ class Huia_ORM extends Kohana_ORM {
         {
           $result[$key] = $item->get_url($key);
         }
-
-        if ( ! isset($result['slug']) AND is_string($key) AND is_string($value) AND preg_match('/^(name|title)/', $key))
-        {
-          $result['slug'] = Huia_URL::slug($value .' '. $result['id']);
-        }
       }
 
       if ($callback)
