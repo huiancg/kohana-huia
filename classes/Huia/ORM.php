@@ -638,6 +638,21 @@ class Huia_ORM extends Kohana_ORM {
   }
 
   /**
+   * All routes
+   * 
+   * @return array
+   */
+  public static function route_models_array()
+  {
+    $data = [];
+    foreach (self::$_route_models as $model_name => $model)
+    {
+      $data[$model_name] = Arr::get($model->all_as_array(), 0);
+    }
+    return $data;
+  }
+
+  /**
    * Route model
    * 
    * @return self
