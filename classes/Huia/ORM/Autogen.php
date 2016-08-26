@@ -557,48 +557,4 @@ class Huia_ORM_Autogen {
     return $tables;
   }
 
-  protected static function _get_models($items, $models = array())
-  {
-    $modules = array_values(Kohana::modules());
-    if (is_array($items))
-    {
-      foreach ($items as $key => $value)
-      {
-        $models = self::_get_models($value, $models);
-      }
-    }
-    else
-    {
-      $dir = 'classes'.DIRECTORY_SEPARATOR.'Model'.DIRECTORY_SEPARATOR;
-      $items = str_replace($modules, '', $items);
-      $dir = str_replace(array($dir, APPPATH, EXT), '', $items);
-      $model = str_replace(DIRECTORY_SEPARATOR, '_', $dir);
-
-      $reflection = new ReflectionClass('Model_'.$model);
-      if ( ! $reflection->isAbstract())
-      {
-        $models[] = $model;
-      }
-    }
-    return array_unique($models);
-  }
-
-  public static function get_models()
-  {
-    $dir = 'classes'.DIRECTORY_SEPARATOR.'Model'.DIRECTORY_SEPARATOR;
-    $models = self::_get_models(Kohana::list_files($dir));
-    sort($models);
-    $ignore_models = Kohana::$config->load('huia/base.ignore_models');
-
-    foreach ($models as $index => $model)
-    {
-      if (preg_match('/^Base_/', $model) OR in_array($model, $ignore_models))
-      {
-        unset($models[$index]);
-      }
-    }
-
-    return $models;
-  }
-
 }
