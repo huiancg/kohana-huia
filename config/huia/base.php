@@ -5,8 +5,9 @@ return array(
 	'cache_token' => sha1(Cookie::$salt . '.C4cH3c13An37!'),
 	'autogen' => array(
 		'database' => Kohana::$environment !== Kohana::PRODUCTION,
-		'tables'   => FALSE,
-		'models'   => Kohana::$environment === Kohana::DEVELOPMENT,
+		'tables'   => Kohana::$environment !== Kohana::PRODUCTION,
+		'models'   => Kohana::$environment !== Kohana::PRODUCTION,
+		'models_clean' => Kohana::$environment !== Kohana::PRODUCTION,
 	),
 	'ignore_models' => array('App', 'Auth_Role', 'Auth_User', 'Auth_User_Token', 'Log', 'Role', 'User', 'User_Token'),
 );

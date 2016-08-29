@@ -1,8 +1,8 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
 class Huia_ORM_Autogen {
-  
-  public static function generate_tables()
+
+  protected static function check_upset_tables()
   {
     $models = Kohana::list_files('classes/model');
     $models = array_keys(Arr::flatten($models));
@@ -63,10 +63,105 @@ class Huia_ORM_Autogen {
       }
     }
 
+    $queries = [];
+
     foreach ($tables as $name => $value)
     {
-      self::save_tables($name, $value, $throughs);
+      $items = self::check_source($name, $value, $throughs);
+
+      if ( ! empty($items))
+      {
+        $queries[$name] = $items;
+      }
     }
+
+    return $queries;
+  }
+
+  public static function check_invalid_tables()
+  {
+    $list_tables = self::list_tables();
+    
+    $queries = [];
+
+    foreach ($list_tables as $item)
+    {
+      $item_queries = [];
+      
+      if ( ! class_exists('Model_Base_'.$item['model']))
+      {
+        $query = 'DROP TABLE `' . $item['table_name'] . '`;';
+        $item_queries[] = self::format_query($query, 'Drop table :table_name', [':table_name' => $item['table_name'],]);
+      }
+
+      if ( ! empty($item_queries))
+      {
+        $queries[$item['table_name']] = $item_queries;
+      }
+    }
+
+    return $queries;
+
+  }
+  
+  public static function generate_tables()
+  {
+    $queries = self::check_upset_tables();
+
+    $queries += self::check_invalid_tables();
+    
+    if (self::valid_autogen_form())
+    {
+      if (Request::current()->post('autogen_ignore'))
+      {
+        Cookie::set('autogen_ignore', 1);
+        return;
+      }
+      
+      $valid_queries = self::filter_valid_queries($queries, Request::current()->post('queries'));
+
+      foreach ($valid_queries as $query)
+      {
+        Database::instance()->query(NULL, $query);
+      }
+    }
+    else
+    {
+      if ( ! empty($queries))
+      {
+        $token = Security::token(TRUE);
+        exit(View::factory('huia/orm/autogen', compact('queries', 'token')));
+      }
+    }
+  }
+
+  protected static function filter_valid_queries($queries, $ids)
+  {
+    if ( ! $ids OR empty($ids))
+    {
+      return [];
+    }
+
+    $valid_queries = [];
+
+    foreach ($queries as $table => $values)
+    {
+      foreach ($values as $items)
+      {
+        if (in_array(Arr::get($items, 'id', 0), $ids))
+        {
+          $valid_queries[] = $items['query'];
+        }
+      }
+    }
+
+    return $valid_queries;
+  }
+
+  protected static function valid_autogen_form()
+  {
+    return Request::current()->method() === Request::POST AND
+           Request::current()->post('token') === Security::token();
   }
 
   protected static function format_field_query($field, $data)
@@ -87,12 +182,6 @@ class Huia_ORM_Autogen {
     // Extra type
     $item .= isset($type_parts[1]) ? strtoupper($type_parts[1]) . ' ' : '';
 
-    // autoincrement
-    // if (Arr::get($data, 'extra') === 'auto_increment')
-    // {
-    //  $item .= 'AUTO_INCREMENT ';
-    // }
-
     // NOT NULL
     if ( ! Arr::get($data, 'is_nullable'))
     {
@@ -103,17 +192,23 @@ class Huia_ORM_Autogen {
       $item .= 'NULL ';
     }
 
-    // Is primary
-    // if (Arr::get($data, 'key') === 'PRI' OR $field === 'id')
-    // {
-    //  $item .= 'PRIMARY KEY ';
-    // }
-
     return trim($item);
   }
-  
-  public static function save_tables($table_name, $model_values, $ignore = array())
+
+  protected static function format_query($query, $description, $values = [])
   {
+    return [
+      'id' => md5($query),
+      'description' => __($description, $values),
+      'query' => $query,
+    ];
+  }
+  
+  public static function check_source($table_name, $model_values, $ignore = array())
+  {
+    $ignore[] = 'logs';
+
+    $queries = [];
 
     if ( ! self::table_exists($table_name))
     {
@@ -125,13 +220,10 @@ class Huia_ORM_Autogen {
 
       $default_engine = 'ENGINE=InnoDB DEFAULT CHARSET=utf8;';
       $query = 'CREATE TABLE `' . $table_name . '` ('. join(', ', $query) .') '.$default_engine;
-      
-      // log table creation
-      Kohana::$log->add(Log::DEBUG, $query);
 
-      DB::query(NULL, $query)->execute();
+      $queries[] = self::format_query($query, 'Create table :table_name', [':table_name' => $table_name,]);
 
-      self::primary_keys($model_values, $table_name);
+      //DB::query(NULL, $query)->execute();
     }
     else if ( ! in_array($table_name, $ignore))
     {
@@ -199,8 +291,10 @@ class Huia_ORM_Autogen {
 
       if (empty($add) AND empty($modify) AND empty($drop))
       {
-        return;
+        return $queries;
       }
+
+      // dd($table_name, $add, $modify, $drop);
 
       // ADD [COLUMN] col_name column_definition [FIRST | AFTER col_name]
       // MODIFY [COLUMN] col_name column_definition [FIRST | AFTER col_name]
@@ -208,9 +302,11 @@ class Huia_ORM_Autogen {
 
       foreach (array_unique($drop) as $name)
       {
-        $query = 'ALTER TABLE `'.$table_name.'` DROP `'.$name.'`';
+        $query = 'ALTER TABLE `'.$table_name.'` DROP `'.$name.'`;';
 
-        DB::query(NULL, $query)->execute();
+        $queries[] = self::format_query($query, 'Remove property :name', [':name' => $name,]);
+
+        // DB::query(NULL, $query)->execute();
       }
 
       $keys = array_keys($model_values);
@@ -222,21 +318,31 @@ class Huia_ORM_Autogen {
         $index = array_search($name, $keys);
         $index = ($index === 0) ? ' FIRST ' : ' AFTER ' . $keys[$index - 1];
 
-        $query = 'ALTER TABLE `'.$table_name.'` ADD '.$query.$index;
+        $query = 'ALTER TABLE `'.$table_name.'` ADD '.$query.$index.';';
 
-        DB::query(NULL, $query)->execute();
+        $queries[] = self::format_query($query, 'Add property :name', [':name' => $name,]);
+
+        // DB::query(NULL, $query)->execute();
       }
 
       foreach (array_unique($modify) as $name)
       {
-        $query = self::format_field_query($name, $model_values[$name]);
-        $query = 'ALTER TABLE `'.$table_name.'` MODIFY '.$query;
+        $modify_query = self::format_field_query($name, $model_values[$name]);
+        $query = 'ALTER TABLE `'.$table_name.'` MODIFY '.$modify_query.';';
 
-        DB::query(NULL, $query)->execute();
+        $queries[] = self::format_query($query, 'Modify :modify_query', [':modify_query' => $modify_query,]);
+        // DB::query(NULL, $query)->execute();
       }
 
-      self::primary_keys($model_values, $table_name);
     }
+
+    $primary_keys = self::primary_keys($model_values, $table_name);
+    if ($primary_keys)
+    {
+      $queries[] = $primary_keys;
+    }
+
+    return $queries;
   }
 
   protected static function primary_keys($model_values, $table_name)
@@ -275,25 +381,25 @@ class Huia_ORM_Autogen {
       }
     }
 
+    $result = '';
+    
     if ( ! empty($primary_keys))
     {
       $add = 'ADD PRIMARY KEY ('. join(',', $primary_keys) .')';
       $query = ( ! empty($query)) ? ' MODIFY '.join(', MODIFY ', $query).',' : '';
-      try
-      {
-        $execute = 'ALTER TABLE '.$table_name.' DROP PRIMARY KEY, '.$query.' '. $add;
-        DB::query(NULL, $execute)->execute();
-      }
-      catch (Exception $e)
-      {
-        $execute = 'ALTER TABLE '.$table_name . ' ' . $query . $add;
-        DB::query(NULL, $execute)->execute(); 
-      }
+      $execute = 'ALTER TABLE '.$table_name.' DROP PRIMARY KEY, '.$query.' '. $add;
     }
+
+    return $result;
   }
 
   public static function autogen()
   { 
+    if (Cookie::get('autogen_ignore'))
+    {
+      return;
+    }
+
     $autogen = Kohana::$config->load('huia/base.autogen');
 
     if (Arr::get($autogen, 'database') AND ! self::db_exists())
@@ -315,6 +421,12 @@ class Huia_ORM_Autogen {
     if (Arr::get($autogen, 'models') AND self::db_exists())
     {
       self::generate_models();
+    }
+
+    // clean models
+    if (Arr::get($autogen, 'models_clean') AND self::db_exists())
+    {
+      self::clean_models();
     }
   }
   
@@ -343,9 +455,11 @@ class Huia_ORM_Autogen {
       return FALSE;
     }
   }
-  
-  public static function generate_models()
+
+  protected static function list_tables()
   {
+    $items = [];
+
     foreach (Database::instance()->list_tables() as $name)
     {
       $_columns = array_keys(Database::instance()->list_columns($name));
@@ -365,8 +479,59 @@ class Huia_ORM_Autogen {
         continue;
       }
       
-      self::generate_model($model_name);
+      $items[] = [
+        'model' => $model_name,
+        'table_name' => $name,
+      ];
     }
+
+    return $items;
+  }
+  
+  public static function generate_models()
+  {
+    foreach (self::list_tables() as $item)
+    {
+      self::generate_model(Arr::get($item, 'model'));
+    }
+  }
+
+  public static function currrent_models()
+  {
+    $models = Kohana::list_files('classes/model/base');
+    
+    $results = [];
+
+    foreach (Arr::flatten($models) as $model => $location)
+    {
+      $file = str_replace(['classes/model/base'.DIRECTORY_SEPARATOR, EXT], '', $model);
+
+      $table_name =  str_replace(DIRECTORY_SEPARATOR, '_', $file);
+      
+      $results[] = [
+        'is_app' => (strpos($location, APPPATH) === 0),
+        'file' => str_replace('classes'.DIRECTORY_SEPARATOR.'Model'.DIRECTORY_SEPARATOR.'Base', 'classes'.DIRECTORY_SEPARATOR.'Model', $location),
+        'file_base' => $location,
+        'model' => $table_name,
+        'table_name' => strtolower(Inflector::plural($table_name)),
+      ];
+    };
+
+    return $results;
+  }
+  
+  public static function clean_models()
+  {
+    $currrent_models = self::currrent_models();
+
+    foreach ($currrent_models as $item)
+    {
+      if (Arr::get($item, 'is_app') AND ( ! self::table_exists(Arr::get($item, 'table_name'))))
+      {
+        @unlink(Arr::get($item, 'file'));
+        @unlink(Arr::get($item, 'file_base'));
+      }
+    };
   }
   
   public static function generate_model($model, $force = FALSE)
