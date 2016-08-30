@@ -60,8 +60,9 @@ class Huia_Model_Log extends Model_App {
       'data_type' => 'text',
     ),
     'timestamp' => array (
-      'data_type' => 'timestamp',
-      'extra' => 'on update CURRENT_TIMESTAMP',
+      'data_type' => 'int',
+      'display' => '10',
+      'is_nullable' => TRUE,
     ),
     'time' => array (
       'data_type' => 'int unsigned',

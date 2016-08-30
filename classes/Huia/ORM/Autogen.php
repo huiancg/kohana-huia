@@ -75,6 +75,8 @@ class Huia_ORM_Autogen {
       }
     }
 
+    // dd($queries);
+
     return $queries;
   }
 
@@ -109,7 +111,7 @@ class Huia_ORM_Autogen {
     $queries = self::check_upset_tables();
 
     $queries += self::check_invalid_tables();
-    
+
     if (self::valid_autogen_form())
     {
       if (Request::current()->post('autogen_ignore'))
@@ -192,6 +194,11 @@ class Huia_ORM_Autogen {
       $item .= 'NULL ';
     }
 
+    if (Arr::get($data, 'extra') === 'auto_increment')
+    {
+      $item .= 'AUTO_INCREMENT PRIMARY KEY ';
+    }
+
     return trim($item);
   }
 
@@ -206,8 +213,6 @@ class Huia_ORM_Autogen {
   
   public static function check_source($table_name, $model_values, $ignore = array())
   {
-    $ignore[] = 'logs';
-
     $queries = [];
 
     if ( ! self::table_exists($table_name))
@@ -335,6 +340,7 @@ class Huia_ORM_Autogen {
       }
 
     }
+
 
     $primary_keys = self::primary_keys($model_values, $table_name);
     if ($primary_keys)
