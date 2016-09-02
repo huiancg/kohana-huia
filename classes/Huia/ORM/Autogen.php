@@ -269,6 +269,7 @@ class Huia_ORM_Autogen {
             }
             else if ($source_values[$column][$key] !== $model_values[$column][$key])
             {
+              dd($source_values[$column][$key], $model_values[$column][$key]);
               $modify[] = $column;
             }
           }
@@ -399,6 +400,23 @@ class Huia_ORM_Autogen {
     return $result;
   }
 
+  protected static function create_database($name)
+  {
+    $config = Kohana::$config->load('database.'.$name);
+
+    $database = Arr::path($config, 'connection.database');
+
+    $driver = 'Database_'.ucfirst($config['type']);
+
+    unset($config['connection']['database']);
+
+    Database::$instances[$name] = new $driver($config['type'], $config);
+
+    Database::instance()->query(NULL, 'CREATE DATABASE `'.$database.'`');
+
+    Database::$instances = [];
+  }
+
   public static function autogen()
   { 
     if (Cookie::get('autogen_ignore'))
@@ -410,11 +428,7 @@ class Huia_ORM_Autogen {
 
     if (Arr::get($autogen, 'database') AND ! self::db_exists())
     {
-      $database = Kohana::$config->load('database.'.Kohana::$environment.'.connection.database');
-      DB::query(NULL, 'CREATE DATABASE `'.$database.'`')->execute();
-
-      // reset connection
-      Database::instance()->disconnect();
+      self::create_database(Kohana::$environment);
     }
 
     // generate tables
