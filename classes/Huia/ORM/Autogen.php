@@ -4,7 +4,7 @@ class Huia_ORM_Autogen {
 
   protected static function check_upset_tables()
   {
-    $models = Kohana::list_files('classes/model');
+    $models = Kohana::list_files('classes/Model');
     $models = array_keys(Arr::flatten($models));
 
     $tables = array();
@@ -12,7 +12,7 @@ class Huia_ORM_Autogen {
 
     foreach ($models as $name)
     {
-      $name = str_replace(array('classes/model' . DIRECTORY_SEPARATOR, EXT), '', $name);
+      $name = str_replace(array('classes/Model' . DIRECTORY_SEPARATOR, EXT), '', $name);
       $name = str_replace(DIRECTORY_SEPARATOR, '_', $name);
       $reflection = new ReflectionClass('Model_'.$name);
 
@@ -461,6 +461,7 @@ class Huia_ORM_Autogen {
     try
     {
       Database::instance($name)->query(Database::SELECT, 'SELECT 1');
+	  self::list_tables();
       return TRUE;
     }
     catch (Database_Exception $e)
@@ -511,7 +512,7 @@ class Huia_ORM_Autogen {
 
   public static function currrent_models()
   {
-    $models = Kohana::list_files('classes/model/base');
+    $models = Kohana::list_files('classes/Model/Base');
     
     $results = [];
 
