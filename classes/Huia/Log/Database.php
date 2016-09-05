@@ -4,6 +4,11 @@ class Huia_Log_Database extends Log_Writer {
 
   public function write(array $messages)
   {
+    if ( ! ORM_Autogen::db_exists())
+    {
+        return;
+	}
+
     foreach ($messages as $message)
     {
       $additional = Arr::get($message, 'additional');
