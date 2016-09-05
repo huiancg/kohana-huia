@@ -559,8 +559,8 @@ class Huia_ORM_Autogen {
     $model_dir = APPPATH.'classes'.DIRECTORY_SEPARATOR.'Model'.DIRECTORY_SEPARATOR;
     $model_base = $model_dir . $base_dir . DIRECTORY_SEPARATOR;
     
-    $file_name = Kohana::find_file('classes/model', $file);
-    $file_base_name = Kohana::find_file('classes/model/base', $file);
+    $file_name = Kohana::find_file('classes/Model', $file);
+    $file_base_name = Kohana::find_file('classes/Model/Base', $file);
     
     $table_name = strtolower(Inflector::plural($model));
     $table_id = strtolower($model) . '_id';
