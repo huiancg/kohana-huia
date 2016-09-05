@@ -403,18 +403,11 @@ class Huia_ORM_Autogen {
   protected static function create_database($name)
   {
     $config = Kohana::$config->load('database.'.$name);
-
     $database = Arr::path($config, 'connection.database');
 
-    $driver = 'Database_'.ucfirst($config['type']);
-
-    unset($config['connection']['database']);
-
-    Database::$instances[$name] = new $driver($config['type'], $config);
-
-    Database::instance()->query(NULL, 'CREATE DATABASE `'.$database.'`');
-
-    Database::$instances = [];
+	$mysqli = new mysqli($config['connection']['hostname'], $config['connection']['username'], $config['connection']['password']);
+	$mysqli->query('CREATE DATABASE `'.$database.'`');
+	$mysqli->close();
   }
 
   public static function autogen()
