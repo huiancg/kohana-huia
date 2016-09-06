@@ -202,12 +202,13 @@ class Huia_ORM_Autogen {
     return trim($item);
   }
 
-  protected static function format_query($query, $description, $values = [])
+  protected static function format_query($query, $description, $values = [], $checked = FALSE)
   {
     return [
       'id' => md5($query),
       'description' => __($description, $values),
       'query' => $query,
+      'checked' => $checked,
     ];
   }
   
@@ -226,7 +227,7 @@ class Huia_ORM_Autogen {
       $default_engine = 'ENGINE=InnoDB DEFAULT CHARSET=utf8;';
       $query = 'CREATE TABLE `' . $table_name . '` ('. join(', ', $query) .') '.$default_engine;
 
-      $queries[] = self::format_query($query, 'Create table :table_name', [':table_name' => $table_name,]);
+      $queries[] = self::format_query($query, 'Create table :table_name', [':table_name' => $table_name,], TRUE);
 
       //DB::query(NULL, $query)->execute();
     }

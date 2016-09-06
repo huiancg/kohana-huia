@@ -22,7 +22,13 @@
 				<label for="<?php echo $table; ?>"><?php echo str_replace('_', ' ', ORM::get_model_name($table)); ?></label>
 				<?php foreach ($values as $value) : ?>
 				<div class="checkbox">
-					<label><input type="checkbox" name="queries[]" value="<?php echo Arr::get($value, 'id'); ?>"> <?php echo Arr::get($value, 'description'); ?></label>
+					<label><input 
+										type="checkbox" 
+										name="queries[]" 
+										<?php echo ((Arr::get($value, 'checked')) ? 'checked' : ''); ?> 
+										value="<?php echo Arr::get($value, 'id'); ?>"> 
+											<?php echo Arr::get($value, 'description'); ?>
+					</label>
 				</div>
 				<?php endforeach; ?>
 			</div>
