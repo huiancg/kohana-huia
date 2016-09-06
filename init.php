@@ -158,3 +158,10 @@ if ( ! empty($routes))
 }
 
 unset($routes);
+
+// sitemap
+Route::set('sitemap', 'sitemap(.xml)')
+  ->defaults(array(
+    'controller' => 'sitemap',
+    'action'     => 'index',
+  )); 

@@ -32,7 +32,25 @@ class Huia_ORM extends Kohana_ORM {
    */
   public static function all()
   {
-    return ORM::factory(self::get_table())->find_all();
+    return ORM::factory(self::get_table())->filter_valid()->find_all();
+  }
+
+  public function filter_valid()
+  {
+    if (isset($this->date))
+    {
+      $this->where('date', '<', date('Y-m-d H:i:s'));
+    }
+    if (isset($this->published))
+    {
+      $this->where('published', '=', TRUE);
+    }
+    if (isset($this->actived))
+    {
+      $this->where('actived', '=', TRUE);
+    }
+    
+    return $this;
   }
 
   /**
@@ -747,5 +765,12 @@ class Huia_ORM extends Kohana_ORM {
 
     $image->crop($width, $height, $offset_x, $offset_y);
   }
+
+  /**
+   * Apply filter to sitemap
+   * 
+   * @return bool
+   */
+  public function filter_sitemap() {}
   
 }
