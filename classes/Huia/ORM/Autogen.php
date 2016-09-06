@@ -405,9 +405,11 @@ class Huia_ORM_Autogen {
     $config = Kohana::$config->load('database.'.$name);
     $database = Arr::path($config, 'connection.database');
 
-	$mysqli = new mysqli($config['connection']['hostname'], $config['connection']['username'], $config['connection']['password']);
-	$mysqli->query('CREATE DATABASE `'.$database.'`');
-	$mysqli->close();
+    $mysqli = new mysqli($config['connection']['hostname'], $config['connection']['username'], $config['connection']['password']);
+    $mysqli->query('CREATE DATABASE `'.$database.'`');
+    $mysqli->close();
+
+    Database::instance()->disconnect();
   }
 
   public static function autogen()
@@ -461,7 +463,7 @@ class Huia_ORM_Autogen {
     try
     {
       Database::instance($name)->query(Database::SELECT, 'SELECT 1');
-	  self::list_tables();
+    self::list_tables();
       return TRUE;
     }
     catch (Database_Exception $e)
@@ -700,7 +702,7 @@ class Huia_ORM_Autogen {
     
     $hash_current = ($file_base_name) ? preg_replace("/[^A-Za-z0-9]/", "", @file_get_contents($file_base_name)) : NULL;
     $hash_new = preg_replace("/[^A-Za-z0-9]/", "", $render_view);
-	
+  
     if ($hash_current !== $hash_new)
     {
       $file_base_name = $model_base . $file . EXT;
