@@ -11,10 +11,10 @@ class Huia_ORM extends Kohana_ORM {
   public static function orm_deep()
   {
     if (self::$_orm_deep === NULL)
-	{
-	  self::$_orm_deep = Kohana::$config->load('huia/base.orm_deep');
-	}
-	return self::$_orm_deep;
+    {
+      self::$_orm_deep = Kohana::$config->load('huia/base.orm_deep');
+    }
+    return self::$_orm_deep;
   }
 
   /**
