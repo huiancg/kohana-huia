@@ -432,17 +432,17 @@ class Huia_ORM_Autogen {
     {
       self::generate_tables();
     }
-    
-    // generate models
-    if (Arr::get($autogen, 'models') AND self::db_exists())
-    {
-      self::generate_models();
-    }
 
     // clean models
     if (Arr::get($autogen, 'models_clean') AND self::db_exists())
     {
       self::clean_models();
+    }
+    
+    // generate models
+    if (Arr::get($autogen, 'models') AND self::db_exists())
+    {
+      self::generate_models();
     }
   }
   
@@ -464,7 +464,7 @@ class Huia_ORM_Autogen {
     try
     {
       Database::instance($name)->query(Database::SELECT, 'SELECT 1');
-    self::list_tables();
+      self::list_tables();
       return TRUE;
     }
     catch (Database_Exception $e)
@@ -473,7 +473,7 @@ class Huia_ORM_Autogen {
     }
   }
 
-  protected static function list_tables()
+  public static function list_tables()
   {
     $items = [];
 
@@ -521,16 +521,16 @@ class Huia_ORM_Autogen {
 
     foreach (Arr::flatten($models) as $model => $location)
     {
-      $file = str_replace(['classes/model/base'.DIRECTORY_SEPARATOR, EXT], '', $model);
+      $file = str_replace(['classes/Model/Base'.DIRECTORY_SEPARATOR, EXT], '', $model);
 
-      $table_name =  str_replace(DIRECTORY_SEPARATOR, '_', $file);
+      $table_name =  strtolower(Inflector::plural(str_replace(DIRECTORY_SEPARATOR, '_', $file)));
       
       $results[] = [
         'is_app' => (strpos($location, APPPATH) === 0),
         'file' => str_replace('classes'.DIRECTORY_SEPARATOR.'Model'.DIRECTORY_SEPARATOR.'Base', 'classes'.DIRECTORY_SEPARATOR.'Model', $location),
         'file_base' => $location,
-        'model' => $table_name,
-        'table_name' => strtolower(Inflector::plural($table_name)),
+        'model' => ORM::get_model_name($table_name),
+        'table_name' => $table_name,
       ];
     };
 
@@ -703,7 +703,7 @@ class Huia_ORM_Autogen {
     
     $hash_current = ($file_base_name) ? preg_replace("/[^A-Za-z0-9]/", "", @file_get_contents($file_base_name)) : NULL;
     $hash_new = preg_replace("/[^A-Za-z0-9]/", "", $render_view);
-  
+
     if ($hash_current !== $hash_new)
     {
       $file_base_name = $model_base . $file . EXT;
