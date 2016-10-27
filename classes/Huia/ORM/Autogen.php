@@ -75,8 +75,6 @@ class Huia_ORM_Autogen {
       }
     }
 
-    // dd($queries);
-
     return $queries;
   }
 
@@ -227,7 +225,7 @@ class Huia_ORM_Autogen {
       $default_engine = 'ENGINE=InnoDB DEFAULT CHARSET=utf8;';
       $query = 'CREATE TABLE `' . $table_name . '` ('. join(', ', $query) .') '.$default_engine;
 
-      $queries[] = self::format_query($query, 'Create table :table_name', [':table_name' => $table_name,], TRUE);
+      $queries[] = self::format_query($query, 'Create table :table_name', [':table_name' => $table_name,], FALSE);
 
       //DB::query(NULL, $query)->execute();
     }
@@ -270,7 +268,7 @@ class Huia_ORM_Autogen {
             }
             else if ($source_values[$column][$key] !== $model_values[$column][$key])
             {
-              dd($source_values[$column][$key], $model_values[$column][$key]);
+              // dd($source_values[$column][$key], $model_values[$column][$key]);
               $modify[] = $column;
             }
           }
