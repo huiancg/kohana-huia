@@ -115,17 +115,8 @@ class Huia_ORM extends Kohana_ORM {
    * @param string $table_name
    * @return array
    */
-  public function all_as_array($table_name = NULL, $filter = NULL, $callback = NULL, $deep = 0, $parents = [])
+  public function all_as_array($table_name = NULL, $filter = NULL, $callback = NULL, $deep = 0)
   {
-    if ($table_name)
-    {
-        if (in_array($table_name, $parents))
-        {
-          return '*RECURSION*';
-        }
-        $parents[] = $table_name;
-    }
-
     if ($deep > self::orm_deep())
     {
       return 'Too Deep :(';
@@ -224,7 +215,7 @@ class Huia_ORM extends Kohana_ORM {
         $model_name = Arr::get($values, 'model');
         $foreign_key = Arr::get($values, 'foreign_key');
         $model = ORM::factory($model_name)->where('id', '=', $item->{$foreign_key});
-        $result[$key] = $model->all_as_array($this->table_name(), $filter, $callback, $deep, $parents);
+        $result[$key] = $model->all_as_array($this->table_name(), $filter, $callback, $deep);
       }
 
       foreach ($has_many as $key => $values)
@@ -234,7 +225,7 @@ class Huia_ORM extends Kohana_ORM {
         {
           continue;
         }
-        $result[$key] = $item->$key->all_as_array($this->table_name(), $filter, $callback, $deep, $parents);
+        $result[$key] = $item->$key->all_as_array($this->table_name(), $filter, $callback, $deep);
       }
 
       $results[] = $result;
