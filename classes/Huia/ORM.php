@@ -39,11 +39,6 @@ class Huia_ORM extends Kohana_ORM {
    */
   public function all_as_array($table_name = NULL, $filter = NULL, $callback = NULL, $deep = 0, $parents = [])
   {
-    if ($deep > self::orm_deep())
-    {
-      return;
-    }
-
     if ($table_name)
     {
       if (in_array($table_name, $parents))
@@ -52,6 +47,11 @@ class Huia_ORM extends Kohana_ORM {
       }
       $parents[] = $table_name;
     }
+
+    if ($deep > self::orm_deep())
+    {
+      return;
+    }    
 
     $deep++;
     
